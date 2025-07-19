@@ -1,0 +1,38 @@
+# .github/workflows/deploy-prod.yml
+
+name: Deploy to Vercel Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Create .env File
+        run: |
+          echo "NEXT_PUBLIC_API_KEY=${{ secrets.NEXT_PUBLIC_API_KEY }}" >> .env.production
+          echo "NEXT_PUBLIC_ENV_NAME=production" >> .env.production
+
+      - name: Build App
+        run: npm run build
+
+      - name: Deploy to Vercel (Production)
+        run: |
+          npm install -g vercel
+          vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }} --yes

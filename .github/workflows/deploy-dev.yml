@@ -1,0 +1,38 @@
+# .github/workflows/deploy-dev.yml
+
+name: Deploy to Vercel Development
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Create .env File
+        run: |
+          echo "NEXT_PUBLIC_API_KEY=${{ secrets.DEV_API_KEY }}" >> .env.production
+          echo "NEXT_PUBLIC_ENV_NAME=development" >> .env.production
+
+      - name: Build App
+        run: npm run build
+
+      - name: Deploy to Vercel (Dev Project)
+        run: |
+          npm install -g vercel
+          vercel deploy --token ${{ secrets.VERCEL_DEV_TOKEN }} --yes --scope your-team-name
